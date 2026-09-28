@@ -1773,6 +1773,97 @@ body.radialing,body.radialing *{-webkit-user-select:none!important;user-select:n
 /* カーソル（1マスだけの選択）の印 */
 .cur-cell{fill:none;stroke:#4f46e5;stroke-width:1.6;stroke-dasharray:3 2.2}
 </style>
+<!-- 共通の画面の部品（録音スタジオの卓・ヴィンテージ）。読み込めない時・古い版の時は、これまでの見た目のまま -->
+<link rel="stylesheet" href="https://yagarguitar-stack.github.io/design-system/v1/components.css">
+<script src="https://yagarguitar-stack.github.io/design-system/v1/components.js"></script>
+<style>
+/* ===== 共通の部品（版 1.2 以上）が読めた時だけ効く（body に sl-st と ds-studio が付く） ===== */
+body.sl-st{
+  --ink:var(--ds-paper);--ink2:color-mix(in srgb,var(--ds-paper) 88%,#fff);--ink3:color-mix(in srgb,var(--ds-paper) 78%,#fff);--ink-line:var(--st-bezel);--on-ink:var(--ds-ink);--on-ink-dim:var(--st-leg2);
+  --font-ui:"Zen Kaku Gothic New",-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;
+  background-color:var(--ds-paper);
+}
+body.sl-st .paperwrap{background:transparent}
+body.sl-st #paper{box-shadow:0 0 0 1px rgba(0,0,0,.6),0 12px 34px rgba(0,0,0,.55)}
+/* 操作面の中だけ、選んだ色を琥珀の灯りにする（紙面の色は変えない） */
+body.sl-st .topbar,body.sl-st .modebar,body.sl-st .botbar,body.sl-st .sheet-ov,body.sl-st .toast,body.sl-st .phase,body.sl-st .tab-tip{--indigo:var(--st-lamp)}
+
+/* ── 上の棚 ── */
+body.sl-st .topbar{--topbar-h:40px;background:var(--st-deck);border-bottom:0;box-shadow:inset 0 -1px 0 rgba(0,0,0,.6),0 1px 0 var(--st-hl),0 4px 12px rgba(0,0,0,.35)}
+body.sl-st .tb-left{display:none}
+body.sl-st .topbar{grid-template-columns:minmax(0,auto) minmax(0,1fr) auto;column-gap:14px}
+body.sl-st .topbar > .tb-song{grid-column:1;grid-row:1;justify-content:flex-start;padding:4px 6px}
+body.sl-st #sl-bridge{grid-column:2;grid-row:1}
+body.sl-st .tb-tools,body.sl-st .tb-right{grid-column:3;grid-row:1}
+/* Lead は左に曲の情報（キー・小節数）がある：表示窓として右の道具の手前へ */
+body.sl-st .tb-left:has(.tb-meta){display:flex;grid-column:3;grid-row:1;justify-self:start}
+body.sl-st .topbar:has(.tb-left .tb-meta){grid-template-columns:minmax(0,auto) minmax(0,1fr) auto auto}
+body.sl-st .topbar:has(.tb-left .tb-meta) .tb-right{grid-column:4}
+body.sl-st .tb-song .t{font-family:"Permanent Marker","Zen Kaku Gothic New",sans-serif;font-weight:400;font-size:17px;letter-spacing:.05em;color:#1e2a52;background:#efeada;padding:3px 14px 2px;transform:rotate(-1.4deg);box-shadow:0 1px 1.5px rgba(0,0,0,.55);clip-path:polygon(1% 4%,99% 0,100% 94%,0 100%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+body.sl-st .tb-song:hover{background:transparent}
+body.sl-st .tb-song .car{color:var(--st-silk)}
+body.sl-st #sl-bridge{min-width:0}
+body.sl-st .tb-meta{font:500 12.5px "IBM Plex Mono",monospace;color:var(--st-disp);text-shadow:0 0 6px var(--st-dispglow);background:var(--st-dispbg);padding:6px 10px;border-radius:4px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 var(--st-hl)}
+/* ボタン共通：枠と押し面。押すと沈み、選ぶと灯る */
+body.sl-st .tb-btn,body.sl-st .bb-btn,body.sl-st .pen-btn,body.sl-st .topbar .btn,body.sl-st .modebar .btn,body.sl-st .botbar .btn,body.sl-st .sheet-ov .btn,body.sl-st .toast .btn,body.sl-st .topbar .t-btn,body.sl-st .modebar .t-btn,body.sl-st .botbar .t-btn,body.sl-st .sheet-ov .t-btn,body.sl-st .toast .t-btn,body.sl-st .vc-segb{
+  border:0;background:var(--st-cap);color:var(--st-capleg);border-radius:6px;
+  box-shadow:0 0 0 1px var(--st-bezel),inset 0 1px 0 var(--st-caphl),inset 0 -2px 0 rgba(0,0,0,.28),0 3px 0 var(--st-bezel),0 4px 6px rgba(0,0,0,.3);
+  transition:transform .09s cubic-bezier(.2,.8,.2,1),box-shadow .09s,background .18s,color .18s,text-shadow .18s}
+body.sl-st .tb-btn:hover,body.sl-st .bb-btn:hover,body.sl-st .topbar .btn:hover,body.sl-st .modebar .btn:hover,body.sl-st .botbar .btn:hover,body.sl-st .sheet-ov .btn:hover,body.sl-st .toast .btn:hover,body.sl-st .topbar .t-btn:hover,body.sl-st .modebar .t-btn:hover,body.sl-st .botbar .t-btn:hover,body.sl-st .sheet-ov .t-btn:hover,body.sl-st .toast .t-btn:hover{filter:brightness(1.1)}
+body.sl-st .tb-btn:active,body.sl-st .bb-btn:active,body.sl-st .pen-btn:active,body.sl-st .topbar .btn:active,body.sl-st .modebar .btn:active,body.sl-st .botbar .btn:active,body.sl-st .sheet-ov .btn:active,body.sl-st .toast .btn:active,body.sl-st .topbar .t-btn:active,body.sl-st .modebar .t-btn:active,body.sl-st .botbar .t-btn:active,body.sl-st .sheet-ov .t-btn:active,body.sl-st .toast .t-btn:active,body.sl-st .mode-btn:active,body.sl-st .vc-segb:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--st-bezel),inset 0 1px 0 var(--st-caphl),0 1px 0 var(--st-bezel)}
+body.sl-st .tb-btn.on,body.sl-st .bb-btn.on,body.sl-st .pen-btn.on,body.sl-st .topbar .btn.pri,body.sl-st .modebar .btn.pri,body.sl-st .botbar .btn.pri,body.sl-st .sheet-ov .btn.pri,body.sl-st .toast .btn.pri,body.sl-st .mode-btn.on,body.sl-st .vc-segb.on{
+  background:var(--st-lit);color:var(--st-litleg);text-shadow:0 0 8px var(--st-glow);border-color:transparent;
+  box-shadow:0 0 0 1px var(--st-bezel),inset 0 0 14px var(--st-glowin),inset 0 1px 0 rgba(255,255,255,.25),0 3px 0 var(--st-bezel),0 0 16px var(--st-spill)}
+
+/* 再生中・録音中は赤、リズムは緑に灯る */
+body.sl-st .bb-btn.go.on,body.sl-st .mode-btn.play.on{background:linear-gradient(#b32a22,#7a1812);color:#fff;text-shadow:none;box-shadow:0 0 0 1px var(--st-bezel),inset 0 0 14px rgba(255,80,60,.7),0 3px 0 var(--st-bezel),0 0 18px rgba(255,60,40,.45)}
+body.sl-st .bb-btn.rec-on{color:#fff;background:linear-gradient(#b32a22,#7a1812);animation:sl-rec 1.2s ease-in-out infinite}
+@keyframes sl-rec{50%{filter:brightness(.72)}}
+body.sl-st .mode-btn.on.md-rhythm{background:linear-gradient(#1f5a3a,#133a26);color:#b8ffd2;text-shadow:0 0 8px rgba(115,240,160,.8)}
+body.sl-st .topbar .btn.dgr,body.sl-st .modebar .btn.dgr,body.sl-st .botbar .btn.dgr,body.sl-st .sheet-ov .btn.dgr,body.sl-st .toast .btn.dgr,body.sl-st .topbar .t-btn.dgr,body.sl-st .modebar .t-btn.dgr,body.sl-st .botbar .t-btn.dgr,body.sl-st .sheet-ov .t-btn.dgr,body.sl-st .toast .t-btn.dgr,body.sl-st .bb-btn.dgr{color:var(--ds-accent)}
+body.sl-st .bb-btn:disabled,body.sl-st .t-btn:disabled{box-shadow:0 0 0 1px var(--st-bezel);opacity:.45}
+/* ── モードの帯 ── */
+body.sl-st .modebar{background:var(--st-deck);border-bottom:0;box-shadow:inset 0 1px 0 var(--st-hl),0 1px 0 rgba(0,0,0,.7)}
+body.sl-st .mode-grp,body.sl-st .bb-grp,body.sl-st .vc-seg{gap:4px;padding:4px;border:0;border-radius:8px;background:var(--st-well);box-shadow:inset 0 1px 3px rgba(0,0,0,.6),0 1px 0 var(--st-hl)}
+body.sl-st .mode-btn{background:var(--st-cap);color:var(--st-capleg);border-radius:6px;box-shadow:0 0 0 1px var(--st-bezel),inset 0 1px 0 var(--st-caphl),0 2px 0 var(--st-bezel);transition:transform .09s,box-shadow .09s,background .18s}
+/* ── 下の卓 ── */
+body.sl-st .botbar{background:var(--st-deck);border-top:0;box-shadow:inset 0 1px 0 var(--st-hl),0 -1px 0 rgba(0,0,0,.8),0 -10px 22px rgba(0,0,0,.4)}
+body.sl-st .bb-div{background:rgba(0,0,0,.6);box-shadow:1px 0 0 var(--st-hl)}
+body.sl-st .bb-lab,body.sl-st .bb-hint,body.sl-st .bb-lab2{color:var(--st-silk)}
+body.sl-st .bb-bpm-grp{border:0;background:var(--st-well);box-shadow:inset 0 1px 3px rgba(0,0,0,.6),0 1px 0 var(--st-hl)}
+body.sl-st .bb-bpm-display{font:500 15px "IBM Plex Mono",monospace;color:var(--st-disp);text-shadow:0 0 7px var(--st-dispglow);background:var(--st-dispbg);padding:5px 8px;border-radius:4px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
+body.sl-st .bb-bpm-slider{height:8px;background:#040404;border-radius:4px;box-shadow:inset 0 1px 2px #000,0 1px 0 var(--st-hl)}
+body.sl-st .bb-bpm-slider::-webkit-slider-thumb{width:18px;height:30px;border-radius:3px;border:0;background:linear-gradient(90deg,#8e8e8e,#f0f0f0 40%,#1e1e1e 47%,#1e1e1e 53%,#f0f0f0 60%,#8a8a8a);box-shadow:0 3px 5px rgba(0,0,0,.7)}
+body.sl-st .bb-bpm-slider::-moz-range-thumb{width:18px;height:30px;border-radius:3px;border:0;background:#ddd}
+body.sl-st .bb-sel,body.sl-st select{background-color:var(--st-dispbg);color:var(--st-disp);border:0;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 var(--st-hl);font-family:"IBM Plex Mono","Zen Kaku Gothic New",monospace}
+body.sl-st .bb-note{background:var(--st-dispbg);border:0;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
+/* ── 引き出し（ラック）・お知らせ（表示窓） ── */
+body.sl-st .sheet{background:radial-gradient(circle at 14px 14px,#bbb 0 2.5px,#444 3.5px,transparent 4.5px),radial-gradient(circle at calc(100% - 14px) 14px,#bbb 0 2.5px,#444 3.5px,transparent 4.5px),var(--st-rack);border:0;box-shadow:0 0 0 1px #000,inset 0 1px 0 var(--st-hl),0 -12px 30px rgba(0,0,0,.5)}
+body.sl-st .toast{background:var(--st-dispbg);color:var(--st-disp);border:0;text-shadow:0 0 7px var(--st-dispglow);font-family:"IBM Plex Mono","Zen Kaku Gothic New",monospace;box-shadow:0 0 0 1px #000,0 8px 20px rgba(0,0,0,.5)}
+body.sl-st .song-row.picked,body.sl-st .song-row.cur{background:rgba(255,179,64,.10)}
+body.sl-st .song-row.cur{box-shadow:inset 0 0 0 1px var(--st-lamp)}
+body.sl-st[data-ds-finish="vintage"]::before,body.sl-st[data-ds-finish="vintage"]::after{content:'';position:fixed;top:0;bottom:0;width:12px;z-index:60;pointer-events:none;
+  background:linear-gradient(90deg,#4a2a16,#7a4a28 30%,#5a341c 70%,#3a2010);box-shadow:inset -2px 0 3px rgba(0,0,0,.4)}
+body.sl-st[data-ds-finish="vintage"]::before{left:0}body.sl-st[data-ds-finish="vintage"]::after{right:0;box-shadow:inset 2px 0 3px rgba(0,0,0,.4)}
+@media (max-width:900px){body.sl-st[data-ds-finish="vintage"]::before,body.sl-st[data-ds-finish="vintage"]::after{display:none}}
+body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"] .botbar{padding-left:22px;padding-right:22px}
+@media (max-width:900px){body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"] .botbar{padding-left:10px;padding-right:10px}}
+/* 道具の多い画面の幅（〜1000px）では、中央の表示を詰める */
+@media (max-width:1000px){
+  body.sl-st .ds-bpos{flex-wrap:nowrap;gap:6px}
+  body.sl-st .tb-left:has(.tb-meta){display:none}
+  body.sl-st .ds-bpos>.ds-cl{display:none}
+  body.sl-st .ds-bridge .ds-disp{font-size:17px;padding:4px 9px}
+  body.sl-st .ds-lamps{padding:6px 7px;gap:4px}
+  body.sl-st .ds-lamps i{width:10px;height:10px}
+}
+/* ── 幅の狭い画面（スマホの縦向き）では中央の表示を出さない ── */
+@media (max-width:700px){
+  body.sl-st #sl-bridge{display:none}
+  body.sl-st .topbar{grid-template-columns:minmax(0,1fr) auto}
+  body.sl-st .tb-song .t{max-width:46vw;font-size:15px}
+}
+</style>
 </head>
 <body>
 
@@ -8392,6 +8483,7 @@ function clearLoopRange(){
 }
 /* 帯を塗り直す。render() を通さないので、ドラッグ中でも軽い */
 function paintLoopBand(){
+  if(window.SL_TAB_SYNC) setTimeout(window.SL_TAB_SYNC,0);   /* くり返しの範囲が変わったら、上の棚の表示も直す */
   /* ⟳ が切なら帯は出さない。範囲そのものは控えたままなので、
      もう一度入れれば同じ所が戻る */
   const r=TP.loop?loopIdx():null;
@@ -9281,6 +9373,7 @@ function playToggle(){ TP.playing?playStop():playStart(); }
 
 /* ひとつの出来事を、指定の時刻へ予約する */
 function fireEvent(e,at){
+  if(e&&e.kind==='beat'&&window.SL_TAB_BEAT){ try{ window.SL_TAB_BEAT(at,e.barId,e.beat); }catch(_){} }   /* 上の棚の位置の表示へ、拍を知らせる */
   if(e.kind==='count') playCount(at,e.accent);
   else if(e.kind==='beat'){ if(song.play.metro!==false) playClick(at,e.accent); }
   else if(e.kind==='drum'){ if(drumOn()){ if(e.hh) mdrm(at,'hh'); if(e.sn) mdrm(at,'sn'); if(e.bd) mdrm(at,'bd'); } }
@@ -9579,6 +9672,12 @@ function followStage(el,smooth){
   }
 }
 
+/* 上の棚の位置の表示（共通の画面の部品）に、曲と再生の様子を渡す窓口。部品が読めない時は使われない */
+window.SL_TAB={
+  now:()=>AC?AC.currentTime:0, playing:()=>TP.playing, disp:()=>_disp, song:()=>song,
+  loop:()=>{ try{ return TP.loop?loopIdx():null; }catch(_){ return null; } },
+  follow:(el)=>{ try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){} }
+};
 function setPlayhead(barId){
   if(TP.curBar===barId) return;
   TP.curBar=barId;
@@ -26100,6 +26199,45 @@ else boot();
 
 })();
 
+</script>
+<script>/* 共通の画面の部品（版 1.2 以上）が読めた時だけ、録音スタジオの卓（ヴィンテージ）にする */
+(function(){
+  if(!(window.DS&&DS.ui&&parseFloat(DS.ui.version)>=1.2&&DS.ui.bridge))return;
+  var T=window.SL_TAB;if(!T)return;
+  var b=document.body;b.classList.add('ds-studio','sl-st');b.setAttribute('data-ds-finish','vintage');b.setAttribute('data-ds-enter','off');
+  DS.ui.init(b);
+  var tools=document.querySelector('.topbar .tb-tools,.topbar .tb-right');if(!tools)return;
+  var el=document.createElement('div');el.id='sl-bridge';tools.parentNode.insertBefore(el,tools);
+  /* 表示順の小節を、中央の表示の 1,2,3… に写す */
+  function idxOf(si,pos){var D=T.disp();for(var i=0;i<D.length;i++){if(D[i].si===si&&D[i].pos===pos)return i;}return -1;}
+  function idxOfBar(barId){var w=document.querySelector('#paper .mwrap[data-bar="'+barId+'"]');if(!w)return -1;return idxOf(+w.getAttribute('data-si'),+w.getAttribute('data-pos'));}
+  var br=DS.ui.bridge(el,{bars:1,beats:4,onJump:function(k){
+    var d=T.disp()[k-1];if(!d)return;var w=document.querySelector('#paper .mwrap[data-si="'+d.si+'"][data-pos="'+d.pos+'"]');if(w)T.follow(w);}});
+  /* 曲の形：区切りの名前と小節の数、くり返しの範囲、拍子 */
+  var last='';
+  function sync(){
+    var D=T.disp(),S=T.song();if(!D||!D.length)return;
+    var secs=[],cur=null;
+    D.forEach(function(d,i){if(!cur||cur.si!==d.si){var nm='';try{nm=(S.sections[d.si]||{}).name||'';}catch(e){}cur={si:d.si,name:nm,from:i+1,to:i+1};secs.push(cur);}else cur.to=i+1;});
+    var r=T.loop(),lp=r?[r[0]+1,r[1]+1]:null;
+    var ts=4;try{var t=(S.meta&&S.meta.timeSig)||S.timeSig;if(t&&t.n)ts=t.n;}catch(e){}
+    var shape={sections:secs.map(function(x){return {name:x.name,from:x.from,to:x.to};}),bars:D.length,loop:lp,beats:ts};
+    var k=JSON.stringify(shape);if(k!==last){last=k;br.set(shape);}
+  }
+  window.SL_TAB_SYNC=sync;
+  new MutationObserver(function(){clearTimeout(sync._t);sync._t=setTimeout(sync,60);}).observe(document.getElementById('paper'),{childList:true});
+  /* 再生：拍の予定を控え、聞こえる時刻になったら位置と拍を進める */
+  var q=[],shown=false,bar=1,raf=null;
+  window.SL_TAB_BEAT=function(at,barId,beat){q.push({at:at,barId:barId,beat:beat});if(!raf)raf=requestAnimationFrame(loop);};
+  function loop(){
+    raf=null;var now=T.now(),hit=null;
+    while(q.length&&q[0].at<=now){hit=q.shift();}
+    if(hit){var i=idxOfBar(hit.barId);if(i>=0){bar=i+1;br.pos(bar,hit.beat,true);shown=true;}}
+    if(T.playing()){raf=requestAnimationFrame(loop);}
+    else{q=[];if(shown){br.pos(bar,0,false);shown=false;}}
+  }
+  setTimeout(sync,0);window.addEventListener('load',function(){setTimeout(sync,50);});
+})();
 </script>
 </body>
 </html>
