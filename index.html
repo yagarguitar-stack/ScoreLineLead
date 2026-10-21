@@ -940,6 +940,9 @@ body.selecting-zone .hit-mark[data-zone]:hover{fill:rgba(120,120,130,.12)!import
 .ch-slot.hot{background-color:#eef1ff;box-shadow:inset 0 0 0 2px var(--indigo)}
 /* 選んだマス（1.314）。**掴んでいる物は、はっきり見える必要がある** */
 .ch-slot.sel{background-color:#e6ebff;box-shadow:inset 0 0 0 2px var(--indigo)}
+/* 送った先（1.318）。**一瞬だけ光らせる**——残れば選びと紛れる */
+.ch-slot.next{animation:chNext .9s ease-out 1}
+@keyframes chNext{ from{background-color:#dbe4ff} to{background-color:transparent} }
 .ch-slot.sel.beat{box-shadow:inset 0 0 0 2px var(--indigo)}
 /* 掴んで運んでいる元。**どこから動いているのかを残す** */
 .ch-slot.lift{background-color:#f4f5f7;box-shadow:inset 0 0 0 1px #c9ccd3}
@@ -948,6 +951,9 @@ body.selecting-zone .hit-mark[data-zone]:hover{fill:rgba(120,120,130,.12)!import
 /* ══ 鳴り続けている印は、薄く（1.314）══
    **実際に置いた物と、見た目で並んではならない。**淡く、細く、控えめに。 */
 .ch-chip.cont{opacity:.34;pointer-events:none}
+/* 読む姿で「まだ鳴っている」を淡く続ける（1.315） */
+.fl-ch.cont{opacity:.36;font-weight:400;font-style:italic}
+.fl-dgm.cont{opacity:.42}
 .ch-chip.cont .ch-nm{font-weight:400;font-style:italic}
 .ch-slot.has{touch-action:none}
 /* コードの層。**指は通さない**——下のマスが的である */
@@ -1170,6 +1176,10 @@ body[data-lyr="lg"]{--lyr-size:18px}
   padding:5px 10px;border-radius:9px;background:var(--indigo);color:#fff;
   font:800 15px var(--font-ui);box-shadow:0 6px 18px rgba(0,0,0,.34);
 }
+/* 写しと、消しの構え（1.318）。**色で役を分ける** */
+.ch-drag.copy{background:var(--green)}
+.ch-drag.del{background:var(--red)}
+.ch-slot.copyarm{box-shadow:inset 0 0 0 2px var(--green)}
 /* パレット（下の帯の一段目。掴んで浮かせられる） */
 .bb-pal{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:wrap;cursor:grab}
 .bb-pal:active{cursor:grabbing}
@@ -1349,6 +1359,13 @@ body.dragging .mwrap{cursor:ew-resize}
 .vc-segb.on{background:#fff;color:var(--ink-strong);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .vc-row .btn{flex:1 1 auto;min-height:40px}
 .printhead,.printfoot{display:none}
+.snd-credits{flex:0 0 100%;margin:8px 0 0;padding:0 16px;text-align:center}
+/* 音のバランス（1.318）。**つまみは縦に積み、名と値を左右に置く** */
+.mx-box{display:flex;flex-direction:column;gap:6px;width:100%}
+.mx-line{display:flex;align-items:center;gap:10px}
+.mx-lbl{flex:0 0 5.5em;font-size:13px;opacity:.85}
+.mx-line input[type=range]{flex:1 1 auto;min-width:0}
+.mx-val{flex:0 0 5em;text-align:right;font-size:12px;opacity:.75;font-variant-numeric:tabular-nums}
 
 /* ══════════════════════════════════════════
    下の帯（再生と筆）
@@ -1773,97 +1790,11 @@ body.radialing,body.radialing *{-webkit-user-select:none!important;user-select:n
 /* カーソル（1マスだけの選択）の印 */
 .cur-cell{fill:none;stroke:#4f46e5;stroke-width:1.6;stroke-dasharray:3 2.2}
 </style>
-<!-- 共通の画面の部品（録音スタジオの卓・ヴィンテージ）。読み込めない時・古い版の時は、これまでの見た目のまま -->
-<link rel="stylesheet" href="https://yagarguitar-stack.github.io/design-system/v1/components.css">
-<script src="https://yagarguitar-stack.github.io/design-system/v1/components.js"></script>
-<style>
-/* ===== 共通の部品（版 1.2 以上）が読めた時だけ効く（body に sl-st と ds-studio が付く） ===== */
-body.sl-st{
-  --ink:var(--ds-paper);--ink2:color-mix(in srgb,var(--ds-paper) 88%,#fff);--ink3:color-mix(in srgb,var(--ds-paper) 78%,#fff);--ink-line:var(--st-bezel);--on-ink:var(--ds-ink);--on-ink-dim:var(--st-leg2);
-  --font-ui:"Zen Kaku Gothic New",-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;
-  background-color:var(--ds-paper);
-}
-body.sl-st .paperwrap{background:transparent}
-body.sl-st #paper{box-shadow:0 0 0 1px rgba(0,0,0,.6),0 12px 34px rgba(0,0,0,.55)}
-/* 操作面の中だけ、選んだ色を琥珀の灯りにする（紙面の色は変えない） */
-body.sl-st .topbar,body.sl-st .modebar,body.sl-st .botbar,body.sl-st .sheet-ov,body.sl-st .toast,body.sl-st .phase,body.sl-st .tab-tip{--indigo:var(--st-lamp)}
-
-/* ── 上の棚 ── */
-body.sl-st .topbar{--topbar-h:40px;background:var(--st-deck);border-bottom:0;box-shadow:inset 0 -1px 0 rgba(0,0,0,.6),0 1px 0 var(--st-hl),0 4px 12px rgba(0,0,0,.35)}
-body.sl-st .tb-left{display:none}
-body.sl-st .topbar{grid-template-columns:minmax(0,auto) minmax(0,1fr) auto;column-gap:14px}
-body.sl-st .topbar > .tb-song{grid-column:1;grid-row:1;justify-content:flex-start;padding:4px 6px}
-body.sl-st #sl-bridge{grid-column:2;grid-row:1}
-body.sl-st .tb-tools,body.sl-st .tb-right{grid-column:3;grid-row:1}
-/* Lead は左に曲の情報（キー・小節数）がある：表示窓として右の道具の手前へ */
-body.sl-st .tb-left:has(.tb-meta){display:flex;grid-column:3;grid-row:1;justify-self:start}
-body.sl-st .topbar:has(.tb-left .tb-meta){grid-template-columns:minmax(0,auto) minmax(0,1fr) auto auto}
-body.sl-st .topbar:has(.tb-left .tb-meta) .tb-right{grid-column:4}
-body.sl-st .tb-song .t{font-family:"Permanent Marker","Zen Kaku Gothic New",sans-serif;font-weight:400;font-size:17px;letter-spacing:.05em;color:#1e2a52;background:#efeada;padding:3px 14px 2px;transform:rotate(-1.4deg);box-shadow:0 1px 1.5px rgba(0,0,0,.55);clip-path:polygon(1% 4%,99% 0,100% 94%,0 100%);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
-body.sl-st .tb-song:hover{background:transparent}
-body.sl-st .tb-song .car{color:var(--st-silk)}
-body.sl-st #sl-bridge{min-width:0}
-body.sl-st .tb-meta{font:500 12.5px "IBM Plex Mono",monospace;color:var(--st-disp);text-shadow:0 0 6px var(--st-dispglow);background:var(--st-dispbg);padding:6px 10px;border-radius:4px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 var(--st-hl)}
-/* ボタン共通：枠と押し面。押すと沈み、選ぶと灯る */
-body.sl-st .tb-btn,body.sl-st .bb-btn,body.sl-st .pen-btn,body.sl-st .topbar .btn,body.sl-st .modebar .btn,body.sl-st .botbar .btn,body.sl-st .sheet-ov .btn,body.sl-st .toast .btn,body.sl-st .topbar .t-btn,body.sl-st .modebar .t-btn,body.sl-st .botbar .t-btn,body.sl-st .sheet-ov .t-btn,body.sl-st .toast .t-btn,body.sl-st .vc-segb{
-  border:0;background:var(--st-cap);color:var(--st-capleg);border-radius:6px;
-  box-shadow:0 0 0 1px var(--st-bezel),inset 0 1px 0 var(--st-caphl),inset 0 -2px 0 rgba(0,0,0,.28),0 3px 0 var(--st-bezel),0 4px 6px rgba(0,0,0,.3);
-  transition:transform .09s cubic-bezier(.2,.8,.2,1),box-shadow .09s,background .18s,color .18s,text-shadow .18s}
-body.sl-st .tb-btn:hover,body.sl-st .bb-btn:hover,body.sl-st .topbar .btn:hover,body.sl-st .modebar .btn:hover,body.sl-st .botbar .btn:hover,body.sl-st .sheet-ov .btn:hover,body.sl-st .toast .btn:hover,body.sl-st .topbar .t-btn:hover,body.sl-st .modebar .t-btn:hover,body.sl-st .botbar .t-btn:hover,body.sl-st .sheet-ov .t-btn:hover,body.sl-st .toast .t-btn:hover{filter:brightness(1.1)}
-body.sl-st .tb-btn:active,body.sl-st .bb-btn:active,body.sl-st .pen-btn:active,body.sl-st .topbar .btn:active,body.sl-st .modebar .btn:active,body.sl-st .botbar .btn:active,body.sl-st .sheet-ov .btn:active,body.sl-st .toast .btn:active,body.sl-st .topbar .t-btn:active,body.sl-st .modebar .t-btn:active,body.sl-st .botbar .t-btn:active,body.sl-st .sheet-ov .t-btn:active,body.sl-st .toast .t-btn:active,body.sl-st .mode-btn:active,body.sl-st .vc-segb:active{transform:translateY(2px);box-shadow:0 0 0 1px var(--st-bezel),inset 0 1px 0 var(--st-caphl),0 1px 0 var(--st-bezel)}
-body.sl-st .tb-btn.on,body.sl-st .bb-btn.on,body.sl-st .pen-btn.on,body.sl-st .topbar .btn.pri,body.sl-st .modebar .btn.pri,body.sl-st .botbar .btn.pri,body.sl-st .sheet-ov .btn.pri,body.sl-st .toast .btn.pri,body.sl-st .mode-btn.on,body.sl-st .vc-segb.on{
-  background:var(--st-lit);color:var(--st-litleg);text-shadow:0 0 8px var(--st-glow);border-color:transparent;
-  box-shadow:0 0 0 1px var(--st-bezel),inset 0 0 14px var(--st-glowin),inset 0 1px 0 rgba(255,255,255,.25),0 3px 0 var(--st-bezel),0 0 16px var(--st-spill)}
-
-/* 再生中・録音中は赤、リズムは緑に灯る */
-body.sl-st .bb-btn.go.on,body.sl-st .mode-btn.play.on{background:linear-gradient(#b32a22,#7a1812);color:#fff;text-shadow:none;box-shadow:0 0 0 1px var(--st-bezel),inset 0 0 14px rgba(255,80,60,.7),0 3px 0 var(--st-bezel),0 0 18px rgba(255,60,40,.45)}
-body.sl-st .bb-btn.rec-on{color:#fff;background:linear-gradient(#b32a22,#7a1812);animation:sl-rec 1.2s ease-in-out infinite}
-@keyframes sl-rec{50%{filter:brightness(.72)}}
-body.sl-st .mode-btn.on.md-rhythm{background:linear-gradient(#1f5a3a,#133a26);color:#b8ffd2;text-shadow:0 0 8px rgba(115,240,160,.8)}
-body.sl-st .topbar .btn.dgr,body.sl-st .modebar .btn.dgr,body.sl-st .botbar .btn.dgr,body.sl-st .sheet-ov .btn.dgr,body.sl-st .toast .btn.dgr,body.sl-st .topbar .t-btn.dgr,body.sl-st .modebar .t-btn.dgr,body.sl-st .botbar .t-btn.dgr,body.sl-st .sheet-ov .t-btn.dgr,body.sl-st .toast .t-btn.dgr,body.sl-st .bb-btn.dgr{color:var(--ds-accent)}
-body.sl-st .bb-btn:disabled,body.sl-st .t-btn:disabled{box-shadow:0 0 0 1px var(--st-bezel);opacity:.45}
-/* ── モードの帯 ── */
-body.sl-st .modebar{background:var(--st-deck);border-bottom:0;box-shadow:inset 0 1px 0 var(--st-hl),0 1px 0 rgba(0,0,0,.7)}
-body.sl-st .mode-grp,body.sl-st .bb-grp,body.sl-st .vc-seg{gap:4px;padding:4px;border:0;border-radius:8px;background:var(--st-well);box-shadow:inset 0 1px 3px rgba(0,0,0,.6),0 1px 0 var(--st-hl)}
-body.sl-st .mode-btn{background:var(--st-cap);color:var(--st-capleg);border-radius:6px;box-shadow:0 0 0 1px var(--st-bezel),inset 0 1px 0 var(--st-caphl),0 2px 0 var(--st-bezel);transition:transform .09s,box-shadow .09s,background .18s}
-/* ── 下の卓 ── */
-body.sl-st .botbar{background:var(--st-deck);border-top:0;box-shadow:inset 0 1px 0 var(--st-hl),0 -1px 0 rgba(0,0,0,.8),0 -10px 22px rgba(0,0,0,.4)}
-body.sl-st .bb-div{background:rgba(0,0,0,.6);box-shadow:1px 0 0 var(--st-hl)}
-body.sl-st .bb-lab,body.sl-st .bb-hint,body.sl-st .bb-lab2{color:var(--st-silk)}
-body.sl-st .bb-bpm-grp{border:0;background:var(--st-well);box-shadow:inset 0 1px 3px rgba(0,0,0,.6),0 1px 0 var(--st-hl)}
-body.sl-st .bb-bpm-display{font:500 15px "IBM Plex Mono",monospace;color:var(--st-disp);text-shadow:0 0 7px var(--st-dispglow);background:var(--st-dispbg);padding:5px 8px;border-radius:4px;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
-body.sl-st .bb-bpm-slider{height:8px;background:#040404;border-radius:4px;box-shadow:inset 0 1px 2px #000,0 1px 0 var(--st-hl)}
-body.sl-st .bb-bpm-slider::-webkit-slider-thumb{width:18px;height:30px;border-radius:3px;border:0;background:linear-gradient(90deg,#8e8e8e,#f0f0f0 40%,#1e1e1e 47%,#1e1e1e 53%,#f0f0f0 60%,#8a8a8a);box-shadow:0 3px 5px rgba(0,0,0,.7)}
-body.sl-st .bb-bpm-slider::-moz-range-thumb{width:18px;height:30px;border-radius:3px;border:0;background:#ddd}
-body.sl-st .bb-sel,body.sl-st select{background-color:var(--st-dispbg);color:var(--st-disp);border:0;box-shadow:inset 0 1px 4px rgba(0,0,0,.9),0 1px 0 var(--st-hl);font-family:"IBM Plex Mono","Zen Kaku Gothic New",monospace}
-body.sl-st .bb-note{background:var(--st-dispbg);border:0;box-shadow:inset 0 1px 4px rgba(0,0,0,.9)}
-/* ── 引き出し（ラック）・お知らせ（表示窓） ── */
-body.sl-st .sheet{background:radial-gradient(circle at 14px 14px,#bbb 0 2.5px,#444 3.5px,transparent 4.5px),radial-gradient(circle at calc(100% - 14px) 14px,#bbb 0 2.5px,#444 3.5px,transparent 4.5px),var(--st-rack);border:0;box-shadow:0 0 0 1px #000,inset 0 1px 0 var(--st-hl),0 -12px 30px rgba(0,0,0,.5)}
-body.sl-st .toast{background:var(--st-dispbg);color:var(--st-disp);border:0;text-shadow:0 0 7px var(--st-dispglow);font-family:"IBM Plex Mono","Zen Kaku Gothic New",monospace;box-shadow:0 0 0 1px #000,0 8px 20px rgba(0,0,0,.5)}
-body.sl-st .song-row.picked,body.sl-st .song-row.cur{background:rgba(255,179,64,.10)}
-body.sl-st .song-row.cur{box-shadow:inset 0 0 0 1px var(--st-lamp)}
-body.sl-st[data-ds-finish="vintage"]::before,body.sl-st[data-ds-finish="vintage"]::after{content:'';position:fixed;top:0;bottom:0;width:12px;z-index:60;pointer-events:none;
-  background:linear-gradient(90deg,#4a2a16,#7a4a28 30%,#5a341c 70%,#3a2010);box-shadow:inset -2px 0 3px rgba(0,0,0,.4)}
-body.sl-st[data-ds-finish="vintage"]::before{left:0}body.sl-st[data-ds-finish="vintage"]::after{right:0;box-shadow:inset 2px 0 3px rgba(0,0,0,.4)}
-@media (max-width:900px){body.sl-st[data-ds-finish="vintage"]::before,body.sl-st[data-ds-finish="vintage"]::after{display:none}}
-body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"] .botbar{padding-left:22px;padding-right:22px}
-@media (max-width:900px){body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"] .botbar{padding-left:10px;padding-right:10px}}
-/* 道具の多い画面の幅（〜1000px）では、中央の表示を詰める */
-@media (max-width:1000px){
-  body.sl-st .ds-bpos{flex-wrap:nowrap;gap:6px}
-  body.sl-st .tb-left:has(.tb-meta){display:none}
-  body.sl-st .ds-bpos>.ds-cl{display:none}
-  body.sl-st .ds-bridge .ds-disp{font-size:17px;padding:4px 9px}
-  body.sl-st .ds-lamps{padding:6px 7px;gap:4px}
-  body.sl-st .ds-lamps i{width:10px;height:10px}
-}
-/* ── 幅の狭い画面（スマホの縦向き）では中央の表示を出さない ── */
-@media (max-width:700px){
-  body.sl-st #sl-bridge{display:none}
-  body.sl-st .topbar{grid-template-columns:minmax(0,1fr) auto}
-  body.sl-st .tb-song .t{max-width:46vw;font-size:15px}
-}
-</style>
+<!-- ══ 共通の音源（1.317）══
+     ScoreLineTAB と同じ録音のドラムを鳴らすため、共通の音の仕掛けだけ読み込む。
+     **見た目の部品（components.js）は読まない**——この道具の見た目は変えない。
+     読めなければ中の合成音で鳴る（下の mdrm の受け皿）。 -->
+<script src="https://yagarguitar-stack.github.io/design-system/v1/sound.js"></script>
 </head>
 <body>
 
@@ -1877,6 +1808,7 @@ body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"
     <button class="tb-btn" id="tb-fb" title="スケールの指板を出す／しまう">🎸</button>
     <button class="tb-btn" id="tb-deg" title="コード名の上に、調から見た度数を出します（五線譜・コード譜のどちらでも）">I･V</button>
     <button class="tb-btn" id="tb-an" title="コード進行を分析する">分析</button>
+    <button class="tb-btn" id="tb-mix" title="音のバランスを整える">🎚</button>
     <button class="tb-btn" id="tb-help" title="使い方">?</button>
     <button class="tb-btn" id="tb-set" title="設定">⚙</button>
     <button class="tb-btn" id="tb-print" title="印刷する">⎙</button>
@@ -1902,6 +1834,7 @@ body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"
 </div>
 
   <div class="printfoot" id="printfoot"></div>
+  <div class="snd-credits no-print" id="sndcredits"></div>
 
 <div class="botbar" id="botbar">
   <div class="bb-row bb-pal" id="bb-pal" style="display:none"></div>
@@ -1987,7 +1920,7 @@ body.sl-st[data-ds-finish="vintage"] .topbar,body.sl-st[data-ds-finish="vintage"
    書き出した JSON の身分証（kind:"utadori.song"）を兼ねている。
    ここを変えると、生徒の端末に貯まった曲が丸ごと見えなくなり、
    以前書き出したファイルも読み込めなくなる（§46） */
-const APP={ name:'ScoreLineLead', file:'scoreline-lead', id:'utadori', build:'1.314', phase:'全Phase完了' };
+const APP={ name:'ScoreLineLead', file:'scoreline-lead', id:'utadori', build:'1.318', phase:'全Phase完了' };
 
 /* ══════════════════════════════════════════════════════════════
    手描きのアイコン
@@ -2327,6 +2260,7 @@ function mkSong(o){
       kind:'lead',
       lyricSize:'md',       // コード譜の歌詞の大きさ 'sm' 小 / 'md' 中 / 'lg' 大
       flowDiagram:'each',   // 流し書きの押さえ図 'each' 毎回 / 'change' 変わった時だけ / 'off' 出さない
+      flowChord:'change',   // 流し書きのコード名 'each' 毎回 / 'change' 変わった時だけ / 'fade' 薄く続ける
       flowBarline:'on',     // 流し書きの小節の切れ目 'on' 出す / 'off' 出さない
       chartDiv:2,           // コード譜の格子（1拍を何分割するか。複合拍子は3）
       chartPerLineSet:!!o.meta&&!!o.meta.chartPerLineSet,  // 段組みを一度寄せたか（1.300）
@@ -6939,13 +6873,87 @@ function pasteAt(si,pos,replace){
    iOS では最初の指の動きでしか音を出せないので、そこで起こす
    ══════════════════════════════════════════════════════════════ */
 let AC=null, MASTER=null, DRUMG=null;
+/* ══ ミキサー（1.318）══
+   いままで、ギター・太鼓・メトロノームは**めいめい直に出口へ**つながっていた。
+   帯ごとに分け、大きさ・左右・響きへ送る量を持たせる。
+   **覚えるのは端末**であって曲ではない——大きさは「この部屋のこの機械で
+   ちょうどよい加減」であり、曲を移るたび狂っては困る。 */
+const MIX_KEY='utadori.mix.v1';
+const MIX_BANDS=[['back','伴奏'],['drum','ドラム'],['metro','メトロノーム']];
+const MIX_DEF={ back:{vol:1,pan:0,rev:0}, drum:{vol:1,pan:0,rev:0},
+                metro:{vol:1,pan:0,rev:0}, master:{vol:1}, rev:{size:0.5} };
+let MIX=loadMix();
+function loadMix(){
+  let m=null;
+  try{ m=JSON.parse(localStorage.getItem(MIX_KEY)||'null'); }catch(e){ m=null; }
+  const out=JSON.parse(JSON.stringify(MIX_DEF));
+  if(m&&typeof m==='object'){
+    Object.keys(out).forEach(k=>{
+      if(!m[k]||typeof m[k]!=='object') return;
+      Object.keys(out[k]).forEach(f=>{
+        const v=m[k][f];
+        if(typeof v==='number'&&isFinite(v)) out[k][f]=v;
+      });
+    });
+  }
+  return out;
+}
+function saveMix(){ try{ localStorage.setItem(MIX_KEY,JSON.stringify(MIX)); }catch(e){} }
+function mixVol(k){ const b=MIX[k]; return (b&&typeof b.vol==='number')?b.vol:1; }
+
+/* 帯の節点。音を出す側はここへつなぐ */
+let BACKG=null, METG=null, REVIN=null, REVOUT=null;
+let BACKPAN=null, DRUMPAN=null, METPAN=null;
+let BACKSND=null, DRUMSND=null, METSND=null;
+/* 左右。StereoPanner が無い端末では、何もしない節点で代える */
+function mkPan(){
+  if(AC.createStereoPanner) return AC.createStereoPanner();
+  const g=AC.createGain(); g.pan={ get value(){ return 0; }, set value(v){} };
+  return g;
+}
+function mixApply(){
+  if(!AC) return;
+  const set=(p,v)=>{ try{ p.value=v; }catch(e){} };
+  if(MASTER) set(MASTER.gain,0.9*mixVol('master'));
+  if(BACKG)  set(BACKG.gain,mixVol('back'));
+  if(DRUMG)  set(DRUMG.gain,DRUM_MIX*mixVol('drum'));
+  if(METG)   set(METG.gain,mixVol('metro'));
+  if(BACKPAN&&BACKPAN.pan) set(BACKPAN.pan,MIX.back.pan);
+  if(DRUMPAN&&DRUMPAN.pan) set(DRUMPAN.pan,MIX.drum.pan);
+  if(METPAN&&METPAN.pan)   set(METPAN.pan,MIX.metro.pan);
+  if(BACKSND) set(BACKSND.gain,MIX.back.rev);
+  if(DRUMSND) set(DRUMSND.gain,MIX.drum.rev);
+  if(METSND)  set(METSND.gain,MIX.metro.rev);
+  if(REVOUT)  set(REVOUT.gain,1);
+}
+/* 響き：減衰する雑音で部屋を作る。**長さだけ変えられればよい** */
+function buildRev(){
+  if(!AC||!REVIN) return;
+  if(!AC.createConvolver) return;
+  const sec=0.6+MIX.rev.size*2.2;
+  const sr=AC.sampleRate, len=Math.max(1,Math.floor(sr*sec));
+  const buf=AC.createBuffer(2,len,sr);
+  for(let c=0;c<2;c++){
+    const d=buf.getChannelData(c);
+    for(let i=0;i<len;i++){
+      const x=i/len;
+      d[i]=(Math.random()*2-1)*Math.pow(1-x,2.6)*(1-Math.min(1,i/(sr*0.012))*0+1)*0.5;
+    }
+  }
+  try{ REVIN._cv.buffer=buf; }catch(e){}
+}
 /* ══ 太鼓の大きさ（1.160）══
    L様——「ドラムの音量を全体的にもっと上げて」。
    0.55 まで絞ってあった。**ギターに被らせない**ためだが、
    絞りすぎれば拍を刻む役を果たさない——
    伴奏の上でソロを取る時、**太鼓は聞こえていなければ意味が無い。**
    1.55 まで上げ、代わりに MASTER の手前で軽く潰す（下の tanh）。 */
-const DRUM_MIX=1.55;
+/* ══ 嵩は ScoreLineTAB に合わせる（1.317）══
+   1.55 は**痩せた合成音を持ち上げるための数**であった。
+   録音の音は初めから厚いので、同じ数を通せば頭が潰れる。
+   TAB と同じ 0.55 に揃える——**二つの道具で太鼓の鳴りが違っては、
+   同じ曲を行き来した時に戸惑う。** tanh の潰しは保険として残す。 */
+const DRUM_MIX=0.55;
 function audioReady(){
   if(AC) { if(AC.state==='suspended') AC.resume(); return AC; }
   const C=window.AudioContext||window.webkitAudioContext;
@@ -6953,6 +6961,25 @@ function audioReady(){
   try{ AC=new C(); }catch(e){ return null; }
   MASTER=AC.createGain(); MASTER.gain.value=0.9; MASTER.connect(AC.destination);
   _scrShaper=null;      /* 音の器を作り直したら、潰しも作り直す */
+
+  /* ══ 響きの部屋（1.318）══ 帯ごとに送った音だけがここを通る */
+  REVIN=AC.createGain(); REVIN.gain.value=1;
+  REVOUT=AC.createGain(); REVOUT.gain.value=1;
+  if(AC.createConvolver){
+    const cv=AC.createConvolver(); cv.normalize=true;
+    REVIN._cv=cv; REVIN.connect(cv); cv.connect(REVOUT);
+    buildRev();
+  }else{ REVIN.connect(REVOUT); }
+  REVOUT.connect(MASTER);
+
+  /* 帯：伴奏とメトロノーム（太鼓はこの下で作る） */
+  BACKG=AC.createGain(); BACKPAN=mkPan(); BACKSND=AC.createGain();
+  BACKG.connect(BACKPAN); BACKPAN.connect(MASTER);
+  BACKG.connect(BACKSND); BACKSND.connect(REVIN);
+  METG=AC.createGain(); METPAN=mkPan(); METSND=AC.createGain();
+  METG.connect(METPAN); METPAN.connect(MASTER);
+  METG.connect(METSND); METSND.connect(REVIN);
+
   DRUMG=AC.createGain(); DRUMG.gain.value=DRUM_MIX;
   /* ══ 上げるなら、潰れ方も作る（§1.152 と同じ理屈）══
      利得だけ上げれば、バスドラの頭が切れて**バリッと割れる。**
@@ -6965,9 +6992,12 @@ function audioReady(){
       shp.curve=cv;
       if('oversample' in shp) shp.oversample='2x';
     }catch(e){ shp=null; }
-    if(shp){ DRUMG.connect(shp); shp.connect(MASTER); }
-    else DRUMG.connect(MASTER);
+    DRUMPAN=mkPan(); DRUMSND=AC.createGain();
+    if(shp){ DRUMG.connect(shp); shp.connect(DRUMPAN); shp.connect(DRUMSND); }
+    else { DRUMG.connect(DRUMPAN); DRUMG.connect(DRUMSND); }
+    DRUMPAN.connect(MASTER); DRUMSND.connect(REVIN);
   }
+  mixApply();
   /* iOS の無音対策：長さ0のバッファを一度鳴らして解錠する */
   try{ const b=AC.createBuffer(1,1,22050); const src=AC.createBufferSource();
        src.buffer=b; src.connect(MASTER); src.start(0); }catch(e){}
@@ -7113,9 +7143,14 @@ function normDrum(p){
   if(typeof d.pat!=='string'||(d.pat!=='none'&&!DD[d.pat])) d.pat='none';
   if(!d.custom||typeof d.custom!=='object') d.custom={};
   Object.keys(d.custom).forEach(k=>{ if(!DD[k]) delete d.custom[k]; });
+  d.tight=!!d.tight;      /* 音の長さを締めるか（1.317／TAB と同じ） */
   p.drum=d; return p;
 }
 function drumOn(s){ const d=(s||song).play.drum; return !!(d&&d.pat&&d.pat!=='none'); }
+/* ══ タイト（1.317）══
+   録音の太鼓は余韻が長い。**速い曲では、前の打が次の打に被って濁る。**
+   締めれば粒が立つ。曲ごとに覚える。 */
+function drumTight(){ const d=song&&song.play&&song.play.drum; return !!(d&&d.tight); }
 /* 選ばれているパターン（自作があればそちら） */
 function drumDef(s,key){
   const d=(s||song).play.drum||{}; const k=key||d.pat;
@@ -7136,36 +7171,209 @@ function drumForBar(p,nb){
   return p;                      /* 剰余は先頭から使う（切り詰め） */
 }
 
-/* 音源：BD=150→40Hz のピッチ落とし／SN=ノイズ／HH=ノイズ＋7kHzハイパス */
+/* ══ 録音のドラム（1.317）══
+   ScoreLineTAB と同じ仕掛けでございます。**まず共通の録音音源で鳴らし、
+   読めていなければ合成で鳴らす**——網がつながっていない時も鳴り続ける。
+   出典（CC BY-SA 3.0）は紙の下に載せる。TAB・ことりノームと同じ扱い。 */
+var SMP_DRUM={ bd:{name:'kick',vel:0.833}, sn:{name:'snare',vel:1.016},
+               hh:{name:'hihat',vel:1.020}, hhs:{name:'hihat',vel:0.595},
+               cr:{name:'crash',vel:1.040}, rd:{name:'ride',vel:1.082},
+               oh:{name:'hihat-open',vel:0.802}, rm:{name:'rim',vel:1.088},
+               th:{name:'tom-high',vel:1.196}, tl:{name:'tom-low',vel:0.995} };
+var SMP_NORMAL={ kick:{dur:0.32,release:0.12}, snare:{dur:0.35,release:0.12}, hihat:{dur:0.16,release:0.08},
+                 crash:{dur:1.6,release:0.6}, ride:{dur:0.8,release:0.3},
+                 'hihat-open':{dur:0.8,release:0.25}, rim:{dur:0.16,release:0.08},
+                 'tom-high':{dur:0.5,release:0.2}, 'tom-low':{dur:0.6,release:0.25} };
+var SMP_TIGHT={ kick:{dur:0.15,release:0.05}, snare:{dur:0.12,release:0.05}, hihat:{dur:0.045,release:0.035},
+                crash:{dur:0.35,release:0.15}, ride:{dur:0.25,release:0.10},
+                'hihat-open':{dur:0.18,release:0.08}, rim:{dur:0.06,release:0.04},
+                'tom-high':{dur:0.15,release:0.06}, 'tom-low':{dur:0.18,release:0.07} };
+
+/* オープンハイハットだけ、高い音を持ち上げて明るく・少し大きく通す（録音が控えめなため） */
+var _ohAC=null,_ohIn=null;
+function ohChain(){
+  if(_ohAC===AC&&_ohIn) return _ohIn;
+  const shelf=AC.createBiquadFilter(), g=AC.createGain();
+  shelf.type='highshelf'; shelf.frequency.value=6000; shelf.gain.value=6;
+  g.gain.value=Math.pow(10,3/20);
+  shelf.connect(g); g.connect(DRUMG);
+  _ohAC=AC; _ohIn=shelf; return shelf;
+}
+var drumOpenHat=null;   /* 鳴っているオープンハイハット。次にクローズを叩いた時刻で止める（本物と同じ） */
+var _smpAC=null, _smpLoading=false;
+function smpOk(){ return !!(window.DS&&DS.sound&&DS.sound.drum); }
+function smpBind(){
+  if(!smpOk()||!AC) return;
+  if(_smpAC!==AC){ try{ DS.sound.use({context:AC}); _smpAC=AC; }catch(e){ return; } }
+  if(!_smpLoading){ _smpLoading=true; DS.sound.load('drums').then(smpCredits).catch(()=>{}); }
+}
+function smpCredits(){
+  const el=document.getElementById('sndcredits');
+  if(el&&smpOk()&&DS.sound.creditsHtml) el.innerHTML=DS.sound.creditsHtml(['drums']);
+}
+function smpDrum(t,type){
+  if(!smpOk()||!AC||!DRUMG) return false;
+  if(_smpAC!==AC) smpBind();
+  if(_smpAC!==AC||!DS.sound.isReady('drums')) return false;
+  const d=SMP_DRUM[type]; if(!d) return false;
+  const o={time:t,vel:d.vel,dest:(type==='oh')?ohChain():DRUMG},
+        len=(drumTight()?SMP_TIGHT:SMP_NORMAL)[d.name];
+  if(len){ o.dur=len.dur; o.release=len.release; }
+  try{ const v=DS.sound.drum(d.name,o); if(type==='oh') drumOpenHat=v; return true; }catch(e){ return false; }
+}
+
+/* ══ ドラムの音作り（合成・1.316）══
+   L様——「ドラムの音色をことりノームと同じにして」。
+   ことりノームの `mdrm()` をそのまま移してございます。呼び口は前と同じ
+   `mdrm(時刻, 'bd'|'sn'|'hh')`——鳴らす側は一行も変えておりません。
+   加えて 'hhs'（閉じたハイハット）も持ってまいりました。 */
+
+/* ノイズは毎回作らず使い回す。**一小節ごとに 0.5 秒ぶんの乱数を作るのは無駄である** */
+let _drumNoise=null,_drumNoiseCtx=null;
+function drumNoise(){
+  if(_drumNoise&&_drumNoiseCtx===AC) return _drumNoise;
+  const len=Math.floor(AC.sampleRate*0.5);
+  const buf=AC.createBuffer(1,len,AC.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  _drumNoise=buf; _drumNoiseCtx=AC;
+  return buf;
+}
+function drumNoiseSrc(t,dur){
+  const s=AC.createBufferSource();
+  s.buffer=drumNoise(); s.loop=true;
+  s.start(t); s.stop(t+dur);
+  return s;
+}
+
 function mdrm(t,type){
   if(!AC||!DRUMG) return;
+  if((type==='hh'||type==='hhs')&&drumOpenHat){
+    try{ drumOpenHat.stop(t); }catch(_){} drumOpenHat=null; }
+  if(smpDrum(t,type)) return;          /* 録音で鳴らせたら、合成はしない */
+  /* 以下は録音が読み込めるまでの代わりの音（TAB・ことりノームと同じ作り） */
+  const bus=DRUMG, tight=drumTight();
+  if(type==='oh'){
+    const lenO=tight?0.26:0.6, nO=drumNoiseSrc(t,lenO), hO=AC.createBiquadFilter(), gO=AC.createGain();
+    hO.type='highpass'; hO.frequency.value=7000;
+    gO.gain.setValueAtTime(0.0001,t);
+    gO.gain.exponentialRampToValueAtTime(0.22,t+0.004);
+    gO.gain.exponentialRampToValueAtTime(0.001,t+lenO);
+    nO.connect(hO); hO.connect(gO); gO.connect(bus);
+    drumOpenHat={stop:w=>{ try{ gO.gain.cancelScheduledValues(w);
+      gO.gain.setTargetAtTime(0.0001,w,0.01); }catch(_){} }};
+    return;
+  }
+  if(type==='rm'){
+    const nR=drumNoiseSrc(t,0.05), bR=AC.createBiquadFilter(), gR=AC.createGain();
+    bR.type='bandpass'; bR.frequency.value=1900; bR.Q.value=3;
+    gR.gain.setValueAtTime(0.5,t); gR.gain.exponentialRampToValueAtTime(0.001,t+0.05);
+    nR.connect(bR); bR.connect(gR); gR.connect(bus);
+    return;
+  }
+  if(type==='th'||type==='tl'){
+    const f0=(type==='th')?220:140, lenT=tight?0.18:0.4,
+          oT=AC.createOscillator(), gT=AC.createGain();
+    oT.type='sine'; oT.frequency.setValueAtTime(f0*1.6,t);
+    oT.frequency.exponentialRampToValueAtTime(f0,t+0.05);
+    gT.gain.setValueAtTime(0.0001,t);
+    gT.gain.exponentialRampToValueAtTime(0.6,t+0.004);
+    gT.gain.exponentialRampToValueAtTime(0.001,t+lenT);
+    oT.connect(gT); gT.connect(bus); oT.start(t); oT.stop(t+lenT+0.02);
+    return;
+  }
+  if(type==='cr'||type==='rd'){
+    const crash=(type==='cr'), len=crash?1.4:0.6;
+    const ns2=drumNoiseSrc(t,len), hpc=AC.createBiquadFilter(), gc=AC.createGain();
+    hpc.type='highpass'; hpc.frequency.value=crash?5200:7000;
+    gc.gain.setValueAtTime(0.0001,t);
+    gc.gain.exponentialRampToValueAtTime(crash?0.32:0.12,t+0.004);
+    gc.gain.exponentialRampToValueAtTime(0.001,t+len);
+    ns2.connect(hpc); hpc.connect(gc); gc.connect(bus);
+    if(!crash){ const ob2=AC.createOscillator(), gb2=AC.createGain();
+      ob2.type='triangle'; ob2.frequency.value=3200;
+      gb2.gain.setValueAtTime(0.06,t); gb2.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+      ob2.connect(gb2); gb2.connect(bus); ob2.start(t); ob2.stop(t+0.55); }
+    return;
+  }
   if(type==='bd'){
+    /* 生のバスドラムに寄せた作り。
+       低音を薄くし、そのぶん胴の「コン」とビーターの「コッ」で輪郭を出す */
+    const bus2=AC.createGain(); bus2.gain.value=0.9;
+    const hpf=AC.createBiquadFilter();               /* 50Hz以下を落として重さを抜く */
+    hpf.type='highpass'; hpf.frequency.value=52; hpf.Q.value=0.7;
+    hpf.connect(bus2); bus2.connect(bus);
+
+    /* 芯：落ち方を速くし、着地を高めに取る（低く長く伸ばすと電子音に寄る） */
     const o=AC.createOscillator(), g=AC.createGain();
-    o.connect(g); g.connect(DRUMG);
-    o.frequency.setValueAtTime(150,t);
-    o.frequency.exponentialRampToValueAtTime(40,t+0.1);
-    g.gain.setValueAtTime(0.8,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+0.15);
-    o.start(t); o.stop(t+0.2);
+    o.type='sine';
+    o.frequency.setValueAtTime(180,t);
+    o.frequency.exponentialRampToValueAtTime(72,t+0.022);
+    o.frequency.exponentialRampToValueAtTime(57,t+0.10);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.72,t+0.004);
+    g.gain.exponentialRampToValueAtTime(0.20,t+0.055);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.19);   /* 余韻は短めに */
+    o.connect(g); g.connect(hpf);
+    o.start(t); o.stop(t+0.24);
+
+    /* 胴鳴り：300Hz付近の短い成分。これがあると木の胴らしさが出る */
+    const ob=AC.createOscillator(), gb=AC.createGain();
+    ob.type='triangle';
+    ob.frequency.setValueAtTime(320,t);
+    ob.frequency.exponentialRampToValueAtTime(190,t+0.03);
+    gb.gain.setValueAtTime(0.22,t);
+    gb.gain.exponentialRampToValueAtTime(0.001,t+0.055);
+    ob.connect(gb); gb.connect(bus2);
+    ob.start(t); ob.stop(t+0.07);
+
+    /* アタック：ビーターが当たる音 */
+    const ns=drumNoiseSrc(t,0.03), nf=AC.createBiquadFilter(),
+          nf2=AC.createBiquadFilter(), ng=AC.createGain();
+    nf.type='bandpass'; nf.frequency.value=3600; nf.Q.value=0.8;
+    nf2.type='highpass'; nf2.frequency.value=1200;
+    ng.gain.setValueAtTime(0.42,t);
+    ng.gain.exponentialRampToValueAtTime(0.001,t+0.026);
+    ns.connect(nf); nf.connect(nf2); nf2.connect(ng); ng.connect(bus2);
+
   }else if(type==='sn'){
-    const sr=AC.sampleRate, len=Math.floor(sr*0.1);
-    const buf=AC.createBuffer(1,len,sr), d=buf.getChannelData(0);
-    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
-    const s2=AC.createBufferSource(), g=AC.createGain();
-    s2.buffer=buf; s2.connect(g); g.connect(DRUMG);
-    g.gain.setValueAtTime(0.4,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-    s2.start(t); s2.stop(t+0.15);
-  }else if(type==='hh'){
-    const sr=AC.sampleRate, len=Math.floor(sr*0.05);
-    const buf=AC.createBuffer(1,len,sr), d=buf.getChannelData(0);
-    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*0.3;
-    const s2=AC.createBufferSource(), f=AC.createBiquadFilter(), g=AC.createGain();
-    f.type='highpass'; f.frequency.value=7000;
-    s2.buffer=buf; s2.connect(f); f.connect(g); g.connect(DRUMG);
-    g.gain.setValueAtTime(0.25,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+0.05);
-    s2.start(t); s2.stop(t+0.08);
+    /* 胴：2本の三角波。少しだけピッチが落ちる */
+    [[188,0.30],[336,0.18]].forEach(v=>{
+      const o=AC.createOscillator(), g=AC.createGain();
+      o.type='triangle';
+      o.frequency.setValueAtTime(v[0],t);
+      o.frequency.exponentialRampToValueAtTime(v[0]*0.82,t+0.09);
+      g.gain.setValueAtTime(v[1],t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+      o.connect(g); g.connect(bus);
+      o.start(t); o.stop(t+0.14);
+    });
+    /* スナッピー：帯域を絞ったノイズ。胴より長く残す */
+    const s1=drumNoiseSrc(t,0.22), hp=AC.createBiquadFilter(),
+          bp=AC.createBiquadFilter(), g1=AC.createGain();
+    hp.type='highpass'; hp.frequency.value=1400;
+    bp.type='bandpass'; bp.frequency.value=4200; bp.Q.value=0.55;
+    g1.gain.setValueAtTime(0.0001,t);
+    g1.gain.exponentialRampToValueAtTime(0.62,t+0.002);
+    g1.gain.exponentialRampToValueAtTime(0.12,t+0.06);
+    g1.gain.exponentialRampToValueAtTime(0.001,t+0.20);   /* 響き線の余韻 */
+    s1.connect(hp); hp.connect(bp); bp.connect(g1); g1.connect(bus);
+
+  }else if(type==='hh'||type==='hhs'){
+    /* 金属の濁り：周波数比の揃わない矩形波6本をバンドパスに通す */
+    const open=(type==='hh'), dur=open?0.075:0.045;
+    const ratios=[2,3,4.16,5.43,6.79,8.21], base=open?318:404;
+    const bp2=AC.createBiquadFilter(), hp2=AC.createBiquadFilter(), g2=AC.createGain();
+    bp2.type='bandpass'; bp2.frequency.value=open?9200:11000; bp2.Q.value=0.7;
+    hp2.type='highpass'; hp2.frequency.value=open?7400:9500;
+    g2.gain.setValueAtTime(0.0001,t);
+    g2.gain.exponentialRampToValueAtTime(open?0.30:0.13,t+0.002);
+    g2.gain.exponentialRampToValueAtTime(0.001,t+dur);
+    ratios.forEach(r=>{
+      const o=AC.createOscillator();
+      o.type='square'; o.frequency.value=base*r;
+      o.connect(bp2); o.start(t); o.stop(t+dur+0.02);
+    });
+    bp2.connect(hp2); hp2.connect(g2); g2.connect(bus);
   }
 }
 
@@ -7179,7 +7387,7 @@ function playClick(at,accent){
   g.gain.setValueAtTime(0.0001,at);
   g.gain.exponentialRampToValueAtTime(v,at+0.001);
   g.gain.exponentialRampToValueAtTime(0.0001,at+d);
-  o.connect(f); f.connect(g); g.connect(MASTER);
+  o.connect(f); f.connect(g); g.connect(METG||MASTER);
   o.start(at); o.stop(at+d+0.02);
 }
 /* カウントインの合図（少し柔らかい音にして本編と区別する） */
@@ -7190,7 +7398,7 @@ function playCount(at,accent){
   g.gain.setValueAtTime(0.0001,at);
   g.gain.exponentialRampToValueAtTime(accent?0.3:0.2,at+0.004);
   g.gain.exponentialRampToValueAtTime(0.0001,at+0.10);
-  o.connect(g); g.connect(MASTER);
+  o.connect(g); g.connect(METG||MASTER);
   o.start(at); o.stop(at+0.13);
 }
 
@@ -7300,7 +7508,7 @@ function guitarBus(){
     if(GCONV) GCONV.normalize=false;
     GBUS.connect(GDRY); GDRY.connect(GTRIM);
     if(GCONV){ GBUS.connect(GCONV); GCONV.connect(GWET); GWET.connect(GTRIM); }
-    GTRIM.connect(MASTER);
+    GTRIM.connect(BACKG||MASTER);
     _gbId=null;
   }
   const t=tone();
@@ -8483,7 +8691,6 @@ function clearLoopRange(){
 }
 /* 帯を塗り直す。render() を通さないので、ドラッグ中でも軽い */
 function paintLoopBand(){
-  if(window.SL_TAB_SYNC) setTimeout(window.SL_TAB_SYNC,0);   /* くり返しの範囲が変わったら、上の棚の表示も直す */
   /* ⟳ が切なら帯は出さない。範囲そのものは控えたままなので、
      もう一度入れれば同じ所が戻る */
   const r=TP.loop?loopIdx():null;
@@ -9373,7 +9580,6 @@ function playToggle(){ TP.playing?playStop():playStart(); }
 
 /* ひとつの出来事を、指定の時刻へ予約する */
 function fireEvent(e,at){
-  if(e&&e.kind==='beat'&&window.SL_TAB_BEAT){ try{ window.SL_TAB_BEAT(at,e.barId,e.beat); }catch(_){} }   /* 上の棚の位置の表示へ、拍を知らせる */
   if(e.kind==='count') playCount(at,e.accent);
   else if(e.kind==='beat'){ if(song.play.metro!==false) playClick(at,e.accent); }
   else if(e.kind==='drum'){ if(drumOn()){ if(e.hh) mdrm(at,'hh'); if(e.sn) mdrm(at,'sn'); if(e.bd) mdrm(at,'bd'); } }
@@ -9672,12 +9878,6 @@ function followStage(el,smooth){
   }
 }
 
-/* 上の棚の位置の表示（共通の画面の部品）に、曲と再生の様子を渡す窓口。部品が読めない時は使われない */
-window.SL_TAB={
-  now:()=>AC?AC.currentTime:0, playing:()=>TP.playing, disp:()=>_disp, song:()=>song,
-  loop:()=>{ try{ return TP.loop?loopIdx():null; }catch(_){ return null; } },
-  follow:(el)=>{ try{ el.scrollIntoView({block:'center',behavior:'smooth'}); }catch(_){} }
-};
 function setPlayhead(barId){
   if(TP.curBar===barId) return;
   TP.curBar=barId;
@@ -10105,6 +10305,11 @@ function renderCtxRow(){
                    :'下のパレットでコードを選び、小節を叩いてください');
       btn('選ぶのをやめる','コードの選びを外します（叩いても置かなくなります）',
           ()=>{ chartPick=null; renderChartPad(); renderCtxRow(); },!chartPick,null,'wide');
+      /* 送り（1.318）。**置いた後どこへ進むかを、札の名で言い切る** */
+      btn('送り',chartAdv?'置いた後、次の拍へ進むのをやめます'
+                        :'コードを置いたら、次の拍へ進みます',
+          ()=>{ setChartAdv(!chartAdv); render(); },false,null,
+          chartAdv?'on':'');
     }else if(chartMode==='select'){
       /* ══ 選んでからコードを選ぶ（1.314）══
          数を出す。**いくつ掴んでいるか見えねば、まとめて置くのは怖い** */
@@ -10444,6 +10649,10 @@ const HELP=[
     ['並べた表示のままでも歌詞を書けます','歌詞の所を叩けば、その場に欄が開きます。押さえ図しか無い組には ＋ の印が出ますので、そこを叩けば新しく書けます。**見ている所で直せぬなら、見ている意味が半分になります**ゆえ。位置を動かしたり語を分けたりするのは、〈書き込む〉の姿でどうぞ'],
     ['四つの札','〈入力〉コードを置く ／〈リズム〉刻みを書く ／〈歌詞〉歌詞を書く ／〈選択〉まとめて置く。五線譜の札と同じ形、同じ動きでございます。**選んだ札の道具だけ出ます**——使わぬ道具が並んでいるのは、道具箱であって仕事場ではございませんゆえ'],
     ['まとめて置く（選択）','**マスを先に選んでから、コードを選びます。**〈選択〉に切り替え、置きたいマスを叩いてください——**離れた小節も拾えます**（1・3・5小節の頭だけ、といった選び方ができます）。そのまま横になぞれば続けて選べ、もう一度叩けば外れます。選び終えてパレットのコードを押せば、**選んだマスそれぞれに一つずつ**入ります。敷き詰めるのではございません。〈まとめて消す〉で選んだマスのコードを消せます。札を移れば選びは消えます。**選びは曲に残りません**ので、控えにも印刷にも出ません'],
+    ['音のバランス','上の帯の 🎚 から開きます。**伴奏・ドラム・メトロノーム**それぞれの大きさ・左右・響きへ送る量と、響きの広さ、全体の大きさを決められます。**この端末に覚えます**——曲ごとではございません。大きさは「この機械でちょうどよい加減」でございますゆえ、曲を移るたび狂っては困ります。〈はじめの値に戻す〉でいつでも戻せます'],
+    ['コードを写す・消す','置いたコードを**引けば動きます**。**長押ししてから引けば写します**（元は残ります）。マスの外へ放せば消えます——引いている間に「ここで放せば消します」と出ますので、落としてから驚くことはございません。消しても取り消せます'],
+    ['送り','〈入力〉の帯の〈送り〉を入れますと、コードを置いた後**次の拍へ自動で進みます**。進んだ先は一瞬だけ光ります。八分ごとではなく拍ごとでございます——弾き語り譜でコードが立つのは、ほとんど拍の上でございますゆえ。入り切りはこの端末に覚えます'],
+    ['同じコードが続く時','読む姿では、**変わった所にだけコード名を書きます**（既定）。Em が四小節続けば、書くのは頭の一つだけ——**紙に四つ並べても、伝わるのは「まだ Em」という一事だけ**でございますゆえ。ただし**段の頭とセクションの頭では書き直します**（行が変われば見失いますゆえ）。設定 ⚙ →〈コード譜〉→〈コード名（読む姿）〉で〈毎回出す〉〈薄く続ける〉にも変えられます。**書き込む姿は変わりません**——置いた物は置いたとおりに見えます'],
     ['薄いコード名','書き込む姿では、**前のコードがまだ鳴っている小節の頭**に、同じコード名が薄く出ます。これは**置いてある物ではなく、描いているだけ**でございます——曲には残らず、並べた表示・再生・印刷には出ません。どこでコードが変わるのかを見失わぬための助けでございます'],
     ['細かい設え','〈コードを置く格子〉〈刻みの升目〉〈押さえ図〉〈小節の切れ目〉〈歌詞の大きさ〉は、設定 ⚙ →〈コード譜〉にまとめてございます。**一度決めれば滅多に触らぬもの**が、毎回目に入る場所を占めておりましたゆえ'],
     ['作り方','〈曲を選ぶ〉→〈＋ 新しいコード譜〉から。**モードではなく、曲そのものの種類**でございますので、開けばいつでもこの姿で開きます'],
@@ -11177,6 +11386,13 @@ function renderPlayBar(){
     const de=document.createElement('button'); de.className='bb-btn';
     setIco(de,'pencil'); de.title='パターンを作る'; de.onclick=openDrumEditor;
     row.appendChild(de);
+    /* 〈タイト〉——音の長さを締める。曲ごとに覚える（1.317） */
+    const dt=document.createElement('button');
+    dt.className='bb-btn'+(drumTight()?' on':'');
+    dt.textContent='タイト';
+    dt.title=drumTight()?'音を長めに戻します':'太鼓の音を短く締めます（速い曲で粒が立ちます）';
+    dt.onclick=()=>tx('太鼓の長さを変える',()=>{ song.play.drum.tight=!song.play.drum.tight; });
+    row.appendChild(dt);
   }
   { const sp=document.createElement('span'); sp.className='bb-sp'; row.appendChild(sp); }
 
@@ -13444,6 +13660,12 @@ function flowUnits(bar){
 function renderFlowPaper(paper){
   const wrap=document.createElement('div'); wrap.className='flow';
   const dg=song.meta.flowDiagram||'each';
+  /* ══ 続くコードは、書き直さない（1.315）══
+     L様——「同じコードが続くのに連続で書かれてる」。
+     弾き語り譜の習いは**変わった所にだけ書く**。Em Em Em と並べても、
+     読み手に伝わるのは「まだ Em」という一事だけで、**紙は四倍混む。**
+     ただし段の頭・セクションの頭では書き直す——行が変われば見失うゆえ。 */
+  const cm=song.meta.flowChord||'change';
   const line=(song.meta.flowBarline||'on')==='on';
   let prevKey=null;
   let any=false;
@@ -13472,6 +13694,7 @@ function renderFlowPaper(paper){
       if(bi%per===0){
         body=document.createElement('div'); body.className='fl-body';
         box.appendChild(body);
+        prevKey=null;   /* 段が変われば書き直す（1.315） */
       }
       if(line&&(bi%per)>0){ const d=document.createElement('span'); d.className='fl-line';
         body.appendChild(d); }
@@ -13490,7 +13713,11 @@ function renderFlowPaper(paper){
         if(u.li!=null) e.setAttribute('data-li',String(u.li));
         if(u.c){
           const key=chordKey(u.c);
-          const show=(dg==='each')||(dg==='change'&&key!==prevKey);
+          const cont=(key!=null&&key===prevKey);
+          const hide=(cm==='change'&&cont);
+          const fade=(cm==='fade'&&cont);
+          /* 名を伏せる所には図も出さない。**名の無い図は、ただの繰り返しである** */
+          const show=!hide&&((dg==='each')||(dg==='change'&&!cont));
           if(dg!=='off'&&show){
             const d=document.createElement('span'); d.className='fl-dgm';
             d.setAttribute('data-ch',JSON.stringify({root:u.c.root,type:u.c.type,
@@ -13500,18 +13727,21 @@ function renderFlowPaper(paper){
                                      bass:(u.c.bass==null?null:u.c.bass)}});
             d.innerHTML=diagramSVG(resolveVoicing(song,note),
               {name:'',capo:song.meta.capo>0,auto:isAutoVoicing(song,note),sx:13,sy:8});
+            if(fade) d.classList.add('cont');
             e.appendChild(d);
           }
-          /* ══ 度数は、押さえ図とコード名のあいだへ（1.309）══
-             **コード名の真上**に来るので、五線譜と同じく
-             上から「二度、つまり Dm7」と縦に読める */
-          const dt=DEG[dno+':'+u.ct];
-          if(dt){ const dl=document.createElement('span'); dl.className='fl-deg';
-            dl.textContent=dt; e.appendChild(dl); }
-          const nm=document.createElement('span'); nm.className='fl-ch';
-          if(u.c.syn){ const h=document.createElement('i'); h.className='ch-hook'; nm.appendChild(h); }
-          nm.appendChild(document.createTextNode(chordName(u.c,song.meta)));
-          e.appendChild(nm);
+          if(!hide){
+            /* ══ 度数は、押さえ図とコード名のあいだへ（1.309）══
+               **コード名の真上**に来るので、五線譜と同じく
+               上から「二度、つまり Dm7」と縦に読める */
+            const dt=DEG[dno+':'+u.ct];
+            if(dt){ const dl=document.createElement('span'); dl.className='fl-deg';
+              dl.textContent=dt; e.appendChild(dl); }
+            const nm=document.createElement('span'); nm.className='fl-ch'+(fade?' cont':'');
+            if(u.c.syn){ const h=document.createElement('i'); h.className='ch-hook'; nm.appendChild(h); }
+            nm.appendChild(document.createTextNode(chordName(u.c,song.meta)));
+            e.appendChild(nm);
+          }
           prevKey=key;
         }
         const t=document.createElement('span');
@@ -13971,6 +14201,7 @@ function chartPlace(barId,tick,ch){
     if(old&&old.syn) o.syn=true;
     b.chordAt[tick]=o;
   });
+  chartAdvance(barId,tick);   /* 置いたら次の拍へ（1.318） */
 }
 function chartRemove(barId,tick){
   tx('コードを消す',()=>{
@@ -14333,6 +14564,16 @@ function chartPatDown(pg,e){
    一拍ずらす、隣の小節へ移す——**書きながら何度も起きること**でございます。
    消して置き直す二手では、その間「どこに在ったのか」が消える。
    食いの札も一緒に運ぶ（運ぶのは書いたものそのものである）。 */
+/* ══ 写す（1.318）══ 元はそのまま、同じコードを置く */
+function chartCopyTo(fromBar,fromTick,toBar,toTick){
+  if(fromBar===toBar&&fromTick===toTick) return;
+  tx('コードを写す',()=>{
+    const a=findBar(song,fromBar), b=findBar(song,toBar);
+    if(!a||!b||!a.chordAt||!a.chordAt[fromTick]) return;
+    b.chordAt=b.chordAt||{};
+    b.chordAt[toTick]=clone(a.chordAt[fromTick]);
+  });
+}
 function chartMove(fromBar,fromTick,toBar,toTick){
   if(fromBar===toBar&&fromTick===toTick) return;
   tx('コードを動かす',()=>{
@@ -14368,47 +14609,66 @@ function chartPaperDown(e){
   const cur=bar0&&bar0.chordAt&&bar0.chordAt[tick];
   const has=!!cur;
   const x0=e.clientX, y0=e.clientY;
-  let done=false, tm=null, ghost=null;
+  let done=false, tm=null, ghost=null, copy=false, outside=false;
   const off=()=>{ if(tm){ clearTimeout(tm); tm=null; }
     document.removeEventListener('pointermove',mv);
     document.removeEventListener('pointerup',up);
     document.removeEventListener('pointercancel',up); };
+  /* 放す先が無ければ消える。**引いている間にそう見せる**——
+     落としてから驚かせない（1.318） */
+  const paint=el2=>{
+    const to=(el2&&el2.closest)?el2.closest('.ch-slot'):null;
+    outside=!to;
+    if(!ghost) return;
+    ghost.classList.toggle('del',outside);
+    ghost.textContent=outside?'ここで放せば消します'
+      :(copy?'ここへ写します：':'')+chordName(cur,song.meta)+(cur.syn?'（食い）':'');
+  };
   const mv=ev=>{
     if(ghost){
       ghost.style.left=ev.clientX+'px'; ghost.style.top=ev.clientY+'px';
-      chartHot(document.elementFromPoint(ev.clientX,ev.clientY));
+      const el2=document.elementFromPoint(ev.clientX,ev.clientY);
+      chartHot(el2); paint(el2);
       ev.preventDefault(); return;
     }
     if(Math.abs(ev.clientX-x0)+Math.abs(ev.clientY-y0)<=10) return;
     if(tm){ clearTimeout(tm); tm=null; }
     if(!has){ done=true; off(); return; }        /* 空のマスは紙の巻き取りに譲る */
-    /* 運びに移る。**掴んだ元は薄れさせる**——どこから動いているのか見えねば戻せない */
-    sl.classList.add('lift');
-    ghost=document.createElement('div'); ghost.className='ch-drag';
-    ghost.textContent=chordName(cur,song.meta)+(cur.syn?'（食い）':'');
+    /* 運びに移る。**掴んだ元は薄れさせる**——どこから動いているのか見えねば戻せない
+       （長押ししてから引けば、元を残して写す。1.318） */
+    if(!copy) sl.classList.add('lift');
+    ghost=document.createElement('div'); ghost.className='ch-drag'+(copy?' copy':'');
     document.body.appendChild(ghost);
     ghost.style.left=ev.clientX+'px'; ghost.style.top=ev.clientY+'px';
+    paint(document.elementFromPoint(ev.clientX,ev.clientY));
     ev.preventDefault();
   };
   const up=ev=>{
     off();
+    sl.classList.remove('copyarm');
     if(ghost){
       ghost.remove();
       sl.classList.remove('lift');
       const hot=_chHot; chartHot(null);
       const el2=(ev&&ev.clientX!=null)?document.elementFromPoint(ev.clientX,ev.clientY):null;
       const to=(el2&&el2.closest)?el2.closest('.ch-slot'):hot;
-      /* **紙の外へ落としたら、何も起きない。**消すのは小板の役目である */
-      if(to) chartMove(barId,tick,to.getAttribute('data-bar'),
+      if(to){
+        if(copy) chartCopyTo(barId,tick,to.getAttribute('data-bar'),
+                             parseInt(to.getAttribute('data-tick'),10));
+        else chartMove(barId,tick,to.getAttribute('data-bar'),
                        parseInt(to.getAttribute('data-tick'),10));
-      else render();
+      }else if(copy){ render(); }      /* 写しの途中で外へ出ても、元は消さない */
+      else { chartRemove(barId,tick); toast('コードを消しました（取り消せます）'); }
       return;
     }
     if(done) return;
+    /* 長押しのまま放したら、今までどおり小板を出す（1.318） */
+    if(copy){ openChartChip(barId,tick); return; }
     if(chartPick) chartPlace(barId,tick,chartPick);
     else if(has) openChartChip(barId,tick);
     else toast('下の帯でコードをお選びくださいませ'); };
-  if(has) tm=setTimeout(()=>{ tm=null; done=true; off(); openChartChip(barId,tick); },LP_MS);
+  /* 長押し＝写しの構え。**引けば写し、放せば小板**（1.318） */
+  if(has) tm=setTimeout(()=>{ tm=null; copy=true; sl.classList.add('copyarm'); },LP_MS);
   document.addEventListener('pointermove',mv);
   document.addEventListener('pointerup',up);
   document.addEventListener('pointercancel',up);
@@ -14487,6 +14747,54 @@ function chartSelDown(sl,barId,tick,e){
   document.addEventListener('pointermove',mv);
   document.addEventListener('pointerup',up);
   document.addEventListener('pointercancel',up);
+}
+
+/* ══ 音のバランス（1.318）══
+   帯ごとに大きさ・左右・響きへ送る量を決める。**曲ではなく端末に覚える。** */
+function openMixer(){
+  const pop=popup('音のバランス','この端末に覚えます');
+
+  const line=(label,get,set,min,max,step,fmt)=>{
+    const d=document.createElement('div'); d.className='mx-line';
+    const l=document.createElement('span'); l.className='mx-lbl'; l.textContent=label;
+    const r=document.createElement('input'); r.type='range';
+    r.min=String(min); r.max=String(max); r.step=String(step); r.value=String(get());
+    const v=document.createElement('span'); v.className='mx-val'; v.textContent=fmt(get());
+    r.oninput=()=>{ const x=parseFloat(r.value); set(x); v.textContent=fmt(x);
+      mixApply(); saveMix(); };
+    d.appendChild(l); d.appendChild(r); d.appendChild(v);
+    return d;
+  };
+  const pct=x=>Math.round(x*100)+'％';
+  const lr=x=>x===0?'中央':(x<0?('左 '+Math.round(-x*100)+'％'):('右 '+Math.round(x*100)+'％'));
+
+  MIX_BANDS.forEach(([k,label])=>{
+    const row=pgrp(pop,label);
+    const box=document.createElement('div'); box.className='mx-box';
+    box.appendChild(line('大きさ',()=>MIX[k].vol,v=>MIX[k].vol=v,0,1.5,0.01,pct));
+    box.appendChild(line('左右',()=>MIX[k].pan,v=>MIX[k].pan=v,-1,1,0.02,lr));
+    box.appendChild(line('響き',()=>MIX[k].rev,v=>MIX[k].rev=v,0,1,0.01,pct));
+    row.appendChild(box);
+  });
+
+  { const row=pgrp(pop,'響きの広さ');
+    const box=document.createElement('div'); box.className='mx-box';
+    box.appendChild(line('部屋の大きさ',()=>MIX.rev.size,v=>{ MIX.rev.size=v; buildRev(); },
+      0,1,0.02,x=>x<0.33?'狭い':(x<0.67?'ふつう':'広い')));
+    row.appendChild(box); }
+
+  { const row=pgrp(pop,'全体');
+    const box=document.createElement('div'); box.className='mx-box';
+    box.appendChild(line('大きさ',()=>MIX.master.vol,v=>MIX.master.vol=v,0,1.5,0.01,pct));
+    row.appendChild(box); }
+
+  { const row=pgrp(pop,'');
+    pbtn(row,'はじめの値に戻す',false,()=>{
+      MIX=JSON.parse(JSON.stringify(MIX_DEF));
+      buildRev(); mixApply(); saveMix(); closePop(); openMixer();
+    },'wide'); }
+
+  popClose(pop);
 }
 
 /* ══ パレット（下の帯の一段目）══ */
@@ -15056,6 +15364,41 @@ let chartMode='chord';       /* 'chord' 入力 ／ 'rhythm' リズム ／ 'lyric
    **曲には持たせない。**選びは作業の途中の姿であって、譜面の中身ではない。
    ゆえに控えも印刷も再生も、一切これを見ない。 */
 let chartSel=new Set();
+/* ══ 送り（1.318）══
+   置いたら次の拍へ進む。**八分ごとでは行き過ぎる**——
+   弾き語り譜でコードが立つのは、ほとんど拍の上である。
+   既定は切。入れた覚えは端末に残す（曲ではない）。 */
+let chartAdv=(()=>{ try{ return localStorage.getItem('utadori.adv.v1')==='1'; }catch(e){ return false; } })();
+function setChartAdv(v){
+  chartAdv=!!v;
+  try{ localStorage.setItem('utadori.adv.v1',chartAdv?'1':'0'); }catch(e){}
+}
+/* 次の拍のマス。小節を越えれば次の小節の頭へ。**曲の終いで止まる** */
+function chartNextBeat(barId,tick){
+  const bar=findBar(song,barId); if(!bar) return null;
+  const tot=barTicks(song,bar), bt=T.QUARTER*4/((song.meta.timeSig||{}).d||4);
+  const nt=Math.floor(tick/bt+1)*bt;
+  if(nt<tot) return {b:barId,t:Math.round(nt)};
+  const ord=chartBarOrder();
+  const i=ord.indexOf(barId);
+  if(i<0||i+1>=ord.length) return null;
+  return {b:ord[i+1],t:0};
+}
+/* 譜面に並んでいる順の小節id */
+function chartBarOrder(){
+  const out=[];
+  (song.sections||[]).forEach(sec=>{ (sec.items||[]).forEach(it=>{ out.push(it.barId); }); });
+  return out;
+}
+/* 置いた後の送り。**次の行き先を光らせる**——どこへ進んだか分からねば戸惑う */
+function chartAdvance(barId,tick){
+  if(!chartAdv) return;
+  const n=chartNextBeat(barId,tick);
+  if(!n) return;
+  const sl=document.querySelector('.ch-slot[data-bar="'+n.b+'"][data-tick="'+n.t+'"]');
+  if(sl){ sl.classList.add('next');
+    try{ sl.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(_){} }
+}
 function chartSelKey(b,t){ return b+'|'+t; }
 function chartSelCells(){
   return [...chartSel].map(k=>{ const i=k.lastIndexOf('|');
@@ -24288,6 +24631,11 @@ function renderSettings(){
     song.meta.flowDiagram||'each',
     v=>tx('押さえ図の出し方を変える',()=>{song.meta.flowDiagram=v;})),false,
     '読む姿（枠の無い流し書き）での出し方でございます。初めての生徒様には毎回、慣れた方には名前だけ、と分けられます');
+  fld('コード名（読む姿）',sel([['change','変わった時だけ出す'],['each','毎回出す'],['fade','薄く続ける']],
+    song.meta.flowChord||'change',
+    v=>tx('コード名の出し方を変える',()=>{song.meta.flowChord=v;})),false,
+    '同じコードが続く時の書き方でございます。既定の〈変わった時だけ〉は弾き語り譜の習いどおりで、**段の頭とセクションの頭では書き直します**。〈薄く続ける〉は淡い字で続け、〈毎回出す〉は今までどおり毎回書きます。続きを伏せた所には押さえ図も出しません');
+
   fld('小節の切れ目（読む姿）',sel([['on','薄い線を出す'],['off','出さない']],
     song.meta.flowBarline||'on',
     v=>tx('小節の切れ目を変える',()=>{song.meta.flowBarline=v;})));
@@ -25879,6 +26227,7 @@ function bindUI(){
      L様——「ワンタッチでキーに対して何度に当たるか表示したい」。
      **札は一枚、押すだけ。**設定の奥へ入れれば、稽古の途中で切り替えられない。 */
   $('tb-an').onclick=()=>openAnalyzer(true);
+  $('tb-mix').onclick=()=>{ audioReady(); openMixer(); };
   $('tb-lock').onclick=()=>toggleLock();
   $('tb-deg').onclick=()=>{
     showDegreesFlag=!showDegreesFlag;
@@ -26056,7 +26405,9 @@ window.UTADORI={
   chartPlace, chartRemove, chartSetSyn, chartPlayNotes, renderChartPad, buildTimeline,
   addBars, chordName, chordKey, padRows, isChart, chartDivOf, newChartSong,
   chartMove, palFloat, clampPal, get palPos(){ return palPos; },
-  chartPickChord, chartPlaceSel, chartClearSel, lastChordOf,
+  chartPickChord, chartPlaceSel, chartClearSel, lastChordOf, mdrm, audioReady,
+  drumTight, smpOk, openMixer, mixApply, mixVol, get MIX(){ return MIX; },
+  chartCopyTo, chartNextBeat, setChartAdv, get chartAdv(){ return chartAdv; },
   get chartSel(){ return chartSel; }, chartSelKey,
   get chartAllOpen(){ return chartAllOpen; }, set chartAllOpen(v){ chartAllOpen=v; },
   toggleFretboard, fbState, renderFretboard, patGridEl,
@@ -26199,45 +26550,6 @@ else boot();
 
 })();
 
-</script>
-<script>/* 共通の画面の部品（版 1.2 以上）が読めた時だけ、録音スタジオの卓（ヴィンテージ）にする */
-(function(){
-  if(!(window.DS&&DS.ui&&parseFloat(DS.ui.version)>=1.2&&DS.ui.bridge))return;
-  var T=window.SL_TAB;if(!T)return;
-  var b=document.body;b.classList.add('ds-studio','sl-st');b.setAttribute('data-ds-finish','vintage');b.setAttribute('data-ds-enter','off');
-  DS.ui.init(b);
-  var tools=document.querySelector('.topbar .tb-tools,.topbar .tb-right');if(!tools)return;
-  var el=document.createElement('div');el.id='sl-bridge';tools.parentNode.insertBefore(el,tools);
-  /* 表示順の小節を、中央の表示の 1,2,3… に写す */
-  function idxOf(si,pos){var D=T.disp();for(var i=0;i<D.length;i++){if(D[i].si===si&&D[i].pos===pos)return i;}return -1;}
-  function idxOfBar(barId){var w=document.querySelector('#paper .mwrap[data-bar="'+barId+'"]');if(!w)return -1;return idxOf(+w.getAttribute('data-si'),+w.getAttribute('data-pos'));}
-  var br=DS.ui.bridge(el,{bars:1,beats:4,onJump:function(k){
-    var d=T.disp()[k-1];if(!d)return;var w=document.querySelector('#paper .mwrap[data-si="'+d.si+'"][data-pos="'+d.pos+'"]');if(w)T.follow(w);}});
-  /* 曲の形：区切りの名前と小節の数、くり返しの範囲、拍子 */
-  var last='';
-  function sync(){
-    var D=T.disp(),S=T.song();if(!D||!D.length)return;
-    var secs=[],cur=null;
-    D.forEach(function(d,i){if(!cur||cur.si!==d.si){var nm='';try{nm=(S.sections[d.si]||{}).name||'';}catch(e){}cur={si:d.si,name:nm,from:i+1,to:i+1};secs.push(cur);}else cur.to=i+1;});
-    var r=T.loop(),lp=r?[r[0]+1,r[1]+1]:null;
-    var ts=4;try{var t=(S.meta&&S.meta.timeSig)||S.timeSig;if(t&&t.n)ts=t.n;}catch(e){}
-    var shape={sections:secs.map(function(x){return {name:x.name,from:x.from,to:x.to};}),bars:D.length,loop:lp,beats:ts};
-    var k=JSON.stringify(shape);if(k!==last){last=k;br.set(shape);}
-  }
-  window.SL_TAB_SYNC=sync;
-  new MutationObserver(function(){clearTimeout(sync._t);sync._t=setTimeout(sync,60);}).observe(document.getElementById('paper'),{childList:true});
-  /* 再生：拍の予定を控え、聞こえる時刻になったら位置と拍を進める */
-  var q=[],shown=false,bar=1,raf=null;
-  window.SL_TAB_BEAT=function(at,barId,beat){q.push({at:at,barId:barId,beat:beat});if(!raf)raf=requestAnimationFrame(loop);};
-  function loop(){
-    raf=null;var now=T.now(),hit=null;
-    while(q.length&&q[0].at<=now){hit=q.shift();}
-    if(hit){var i=idxOfBar(hit.barId);if(i>=0){bar=i+1;br.pos(bar,hit.beat,true);shown=true;}}
-    if(T.playing()){raf=requestAnimationFrame(loop);}
-    else{q=[];if(shown){br.pos(bar,0,false);shown=false;}}
-  }
-  setTimeout(sync,0);window.addEventListener('load',function(){setTimeout(sync,50);});
-})();
 </script>
 </body>
 </html>
